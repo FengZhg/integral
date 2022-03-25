@@ -1,0 +1,38 @@
+package logic
+
+import (
+	"github.com/gin-gonic/gin"
+	"integral/server"
+	"sync"
+)
+
+// @Author: Feng
+// @Date: 2022/3/25 15:43
+
+type integralHandler interface {
+	Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error
+	Query(ctx *gin.Context, req *server.QueryReq, rsp *server.QueryRsp) error
+	QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlowRsp) error
+	Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error
+}
+
+var (
+	integralHandlerMap      = map[string]integralHandler{}
+	integralHandlerMapMutex = sync.RWMutex{}
+)
+
+//RegisterIntegralHandler 注册积分处理器
+func RegisterIntegralHandler(appid string, h integralHandler) {
+	integralHandlerMapMutex.Lock()
+	defer integralHandlerMapMutex.Unlock()
+	integralHandlerMap[appid] = h
+}
+
+//GetIntegralHandler 获取积分处理器
+func GetIntegralHandler(appid string) integralHandler {
+	h, exist := integralHandlerMap[appid]
+	if !exist {
+		return nil
+	}
+	return h
+}
