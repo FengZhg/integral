@@ -1,4 +1,4 @@
-package redis_handler
+package redishandler
 
 import (
 	"github.com/gin-gonic/gin"

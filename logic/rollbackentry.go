@@ -12,6 +12,10 @@ import (
 
 //Rollback 回滚流水
 func Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
+	//参数校验
+	if err := checkRollback(ctx, req); err != nil {
+		return err
+	}
 
 	// 获取对应处理器
 	h := GetIntegralHandler(req.GetAppid())
