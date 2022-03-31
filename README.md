@@ -7,7 +7,7 @@
 
 
 ## 实现计划
-| Banch Name | 实现方式 | 其他 |
+| Branch Name | 实现方式 | 其他 |
 | ----- | ---- | ---- |
 | normal | 基本普通实现 |  |
 | eventLoop | 为redis、mysql、pulsar建立eventLoop | pulsar-client-go的consumer内部就是eventloop实现的 |
