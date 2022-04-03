@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
 	log "github.com/sirupsen/logrus"
+	"go.uber.org/ratelimit"
 	"time"
 )
 
@@ -11,12 +12,12 @@ import (
 // @Date: 2022/3/26 16:55
 
 type pulsarConsumerDaemon struct {
-	option          *pulsarOptions
+	option          pulsarOptions
 	procMsgCallback func(pulsar.ConsumerMessage) error
 }
 
 //NewPulsarConsumerDaemon 新pulsar消费者守护协程
-func NewPulsarConsumerDaemon(option *pulsarOptions,
+func NewPulsarConsumerDaemon(option pulsarOptions,
 	callback func(pulsar.ConsumerMessage) error) *pulsarConsumerDaemon {
 	return &pulsarConsumerDaemon{
 		option:          option,
@@ -32,7 +33,7 @@ func (p *pulsarConsumerDaemon) Start() {
 		if err != nil {
 			log.Errorf("Consumer Daemon Quit With Error err:%v", err)
 		}
-		time.Sleep(5 * time.Second)
+		time.Sleep(p.option.consumerRestartInterval)
 	}
 }
 
@@ -63,6 +64,8 @@ func (p *pulsarConsumerDaemon) doConsume() error {
 
 	// 阻塞等待管道
 	for msg := range consumer.Chan() {
+		// 控制速度
+		ratelimit.New(ratelimit.WithoutSlack)
 		// 写数据库
 		err := p.procMsgCallback(msg)
 		if err != nil {

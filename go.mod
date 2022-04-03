@@ -11,6 +11,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/protobuf v1.5.2
 	github.com/sirupsen/logrus v1.8.1
+	go.uber.org/ratelimit v0.2.0
 )
 
 require (
@@ -18,6 +19,7 @@ require (
 	github.com/AthenZ/athenz v1.10.39 // indirect
 	github.com/DataDog/zstd v1.5.0 // indirect
 	github.com/FengZhg/go_tools/go_protocol v0.0.0-20220325081343-bb96db5bf4ec // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/apache/pulsar-client-go/oauth2 v0.0.0-20220120090717-25e59572242e // indirect
 	github.com/ardielle/ardielle-go v1.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

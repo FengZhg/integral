@@ -7,8 +7,8 @@ import "time"
 
 // 构造pulsar的选项结构体
 type pulsarOptions struct {
-	url, topic           string
-	consumerIntervalTime time.Duration
+	url, topic              string
+	consumerRestartInterval time.Duration
 }
 
 type pulsarOptionFunc interface {
@@ -50,19 +50,19 @@ func WithConsumerIntervalTime(intervalTime time.Duration) pulsarOptionFunc {
 		return nil
 	}
 	return newPulsarOptionFunc(func(options *pulsarOptions) {
-		options.consumerIntervalTime = intervalTime
+		options.consumerRestartInterval = intervalTime
 	})
 }
 
 //NewPulsarOptions 新建pulsar选项
-func NewPulsarOptions(opts ...pulsarOptionFunc) *pulsarOptions {
-	p := &pulsarOptions{
-		consumerIntervalTime: 5 * time.Second,
+func NewPulsarOptions(opts ...pulsarOptionFunc) pulsarOptions {
+	p := pulsarOptions{
+		consumerRestartInterval: 5 * time.Second,
 	}
 	// 应用传入参数
 	for _, opt := range opts {
-		if p != nil {
-			opt.apply(p)
+		if opt != nil {
+			opt.apply(&p)
 		}
 	}
 	return p
