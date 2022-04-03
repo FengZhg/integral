@@ -74,12 +74,13 @@ message QueryFlowRsp {
 }
 
 message SingleFlow {
-	string uid        = 1; // 用户id
-	string appid      = 2; // 积分id
-	string type       = 3; // 积分类型
-	int32  opt        = 4; // 操作类型 1：增加余额  2：扣除余额
-	string oid        = 5; // 订单id 唯一标识一个订单
-	int64  integral   = 6; // 操作的余额数量
-	string updateTime = 7; // 操作时间
-	string desc       = 8; // 该修改操作描述
+	string uid       = 1; // 用户id
+	string appid     = 2; // 积分id
+	string type      = 3; // 积分类型
+	uint32 opt       = 4; // 操作类型 1：增加余额  2：扣除余额
+	string oid       = 5; // 订单id 唯一标识一个订单
+	uint64 integral  = 6; // 操作的余额数量
+	uint64 timestamp = 7; // 操作时间戳
+	string time      = 8; // 操作时间
+	string desc      = 9; // 该修改操作描述
 }

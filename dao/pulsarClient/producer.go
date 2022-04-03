@@ -1,4 +1,4 @@
-package pulsar
+package pulsarClient
 
 import (
 	"context"

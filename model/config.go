@@ -5,7 +5,7 @@ package model
 
 const (
 	//Pulsar
-	PulsarUrl   = "pulsar://210.36.22.32:6650"
+	PulsarUrl   = "pulsarClient://210.36.22.32:6650"
 	PulsarTopic = "normal"
 
 	//mysql

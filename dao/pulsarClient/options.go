@@ -1,4 +1,4 @@
-package pulsar
+package pulsarClient
 
 import "time"
 
@@ -47,7 +47,7 @@ func WithTopic(topic string) pulsarOptionFunc {
 //WithConsumerIntervalTime 消费者守护协程重试间隔时间
 func WithConsumerIntervalTime(intervalTime time.Duration) pulsarOptionFunc {
 	if intervalTime < time.Second {
-		intervalTime = time.Second
+		return nil
 	}
 	return newPulsarOptionFunc(func(options *pulsarOptions) {
 		options.consumerIntervalTime = intervalTime
@@ -61,7 +61,9 @@ func NewPulsarOptions(opts ...pulsarOptionFunc) *pulsarOptions {
 	}
 	// 应用传入参数
 	for _, opt := range opts {
-		opt.apply(p)
+		if p != nil {
+			opt.apply(p)
+		}
 	}
 	return p
 }

@@ -1,10 +1,16 @@
 package dao
 
 import (
+	"context"
 	"database/sql"
+	"encoding/json"
+	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
 	log "github.com/sirupsen/logrus"
 	"integral/model"
+	"integral/server"
+	"integral/utils"
+	"time"
 )
 
 // @Author: Feng
@@ -32,7 +38,30 @@ func newDBClient() (*sql.DB, error) {
 	return db, nil
 }
 
-//flowConsumeCallback 用于消费pulsar的
-func flowConsumeCallback(msg *pulsar.Message) {
+//FlowConsumeCallback 用于消费pulsar的
+func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
+	flow := &server.SingleFlow{}
+	// 反序列化语句
+	err := json.Unmarshal(msg.Payload(), flow)
+	if err != nil {
+		log.Errorf("Parse Pulsar Message Error %v", err)
+		return err
+	}
 
+	// 构造请求语句
+	query := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
+		"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(),
+		utils.GetIndex(flow.GetUid()))
+	param := []interface{}{
+		flow.GetUid(), flow.GetOid(), flow.GetAppid(), flow.GetType(), flow.GetOpt(), flow.GetIntegral(), flow.GetTimestamp(), flow.GetTime(), flow.GetDesc(),
+	}
+
+	// 生成带超时的ctx
+	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	_, err = dbCli.ExecContext(ctx, query, param...)
+	if err != nil {
+		log.Errorf("Mysql Insert Error %v", err)
+		return err
+	}
+	return nil
 }
