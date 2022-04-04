@@ -9,6 +9,7 @@ require (
 	github.com/FengZhg/go_tools/goJwt v0.0.0-20220325091222-1c7d500ed79e
 	github.com/apache/pulsar-client-go v0.8.1
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/protobuf v1.5.2
 	github.com/sirupsen/logrus v1.8.1
 	go.uber.org/ratelimit v0.2.0
@@ -23,9 +24,10 @@ require (
 	github.com/apache/pulsar-client-go/oauth2 v0.0.0-20220120090717-25e59572242e // indirect
 	github.com/ardielle/ardielle-go v1.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.1 // indirect
+	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/danieljoos/wincred v1.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/dvsekhvalnov/jose2go v0.0.0-20200901110807-248326c1351b // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect

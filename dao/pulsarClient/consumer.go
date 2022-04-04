@@ -12,12 +12,12 @@ import (
 // @Date: 2022/3/26 16:55
 
 type pulsarConsumerDaemon struct {
-	option          pulsarOptions
+	option          *pulsarOptions
 	procMsgCallback func(pulsar.ConsumerMessage) error
 }
 
 //NewPulsarConsumerDaemon 新pulsar消费者守护协程
-func NewPulsarConsumerDaemon(option pulsarOptions,
+func NewPulsarConsumerDaemon(option *pulsarOptions,
 	callback func(pulsar.ConsumerMessage) error) *pulsarConsumerDaemon {
 	return &pulsarConsumerDaemon{
 		option:          option,
@@ -61,11 +61,14 @@ func (p *pulsarConsumerDaemon) doConsume() error {
 		log.Errorf("Pulsar Create Reader Error err:%v", err)
 		return err
 	}
+	defer consumer.Close()
+
+	// 控制消费速度
+	rl := ratelimit.New(p.option.consumeRateLimit)
 
 	// 阻塞等待管道
 	for msg := range consumer.Chan() {
-		// 控制速度
-		ratelimit.New(ratelimit.WithoutSlack)
+		rl.Take()
 		// 写数据库
 		err := p.procMsgCallback(msg)
 		if err != nil {

@@ -9,6 +9,7 @@ import "time"
 type pulsarOptions struct {
 	url, topic              string
 	consumerRestartInterval time.Duration
+	consumeRateLimit        int
 }
 
 type pulsarOptionFunc interface {
@@ -44,6 +45,13 @@ func WithTopic(topic string) pulsarOptionFunc {
 	})
 }
 
+//WithConsumeRateLimit 带上消费者消费速率
+func WithConsumeRateLimit(consumeRateLimit int) pulsarOptionFunc {
+	return newPulsarOptionFunc(func(options *pulsarOptions) {
+		options.consumeRateLimit = consumeRateLimit
+	})
+}
+
 //WithConsumerIntervalTime 消费者守护协程重试间隔时间
 func WithConsumerIntervalTime(intervalTime time.Duration) pulsarOptionFunc {
 	if intervalTime < time.Second {
@@ -55,8 +63,9 @@ func WithConsumerIntervalTime(intervalTime time.Duration) pulsarOptionFunc {
 }
 
 //NewPulsarOptions 新建pulsar选项
-func NewPulsarOptions(opts ...pulsarOptionFunc) pulsarOptions {
+func NewPulsarOptions(opts ...pulsarOptionFunc) *pulsarOptions {
 	p := pulsarOptions{
+		consumeRateLimit:        5000,
 		consumerRestartInterval: 5 * time.Second,
 	}
 	// 应用传入参数
@@ -65,5 +74,5 @@ func NewPulsarOptions(opts ...pulsarOptionFunc) pulsarOptions {
 			opt.apply(&p)
 		}
 	}
-	return p
+	return &p
 }
