@@ -45,7 +45,6 @@ message ModifyReq {
 	int32  opt      = 4; // 操作类型 1：增加余额  2：扣除余额
 	string oid      = 5; // 订单id 唯一标识一个订单
 	int64  integral = 6; // 需要操作的余额数量
-	string qtype    = 7; // 是否返回操作后积分余额
 	string desc     = 8; // 该修改操作描述
 }
 

@@ -24,9 +24,7 @@ func init() {
 func initPulsarConsumer() {
 	// 启动消费者守护协程
 	pulsarClient.NewPulsarConsumerDaemon(
-		pulsarClient.NewPulsarOptions(
-			pulsarClient.WithUrl(model.PulsarUrl),
-			pulsarClient.WithTopic(model.PulsarTopic)),
+		model.PulsarOpt,
 		dao.FlowConsumeCallback,
 	).Start()
 }

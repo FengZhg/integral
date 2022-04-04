@@ -10,7 +10,7 @@ import (
 // @Author: Feng
 // @Date: 2022/3/28 13:52
 
-func Send(option *pulsarOptions, msgStr string) error {
+func Send(option *pulsarOptions, payload []byte) error {
 	// 获取客户端连接
 	client, err := pulsar.NewClient(pulsar.ClientOptions{
 		URL: option.url,
@@ -32,7 +32,7 @@ func Send(option *pulsarOptions, msgStr string) error {
 	// 发送消息
 	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	_, err = pd.Send(ctxWithTimeout, &pulsar.ProducerMessage{Payload: []byte(msgStr)})
+	_, err = pd.Send(ctxWithTimeout, &pulsar.ProducerMessage{Payload: payload})
 	if err != nil {
 		log.Errorf("Pulsar Send Message Error err:%v", err)
 		return err

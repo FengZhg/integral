@@ -13,3 +13,23 @@ func (r *redisHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *
 
 	return nil
 }
+
+const (
+	rollbackScript = `
+	local flow = redis.call('GET', KEYS[3])
+	if flow == nil then
+		return {'', 10003}
+	end
+	local absBalance = tonumber(redis.call('GET', KEYS[2]))
+	if absBalance == nil then
+		return {'', 10006}
+	end
+	redis.call('INCRBY',KEYS[1], -1 * absBalance)
+	redis.call('DEL', KEYS[3])
+	return {flow ,0}
+`
+)
+
+func rollback() {
+
+}
