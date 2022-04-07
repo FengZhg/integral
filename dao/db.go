@@ -38,6 +38,11 @@ func newDBClient() (*sql.DB, error) {
 	return db, nil
 }
 
+//GetDBClient 获取数据库链接
+func GetDBClient() *sql.DB {
+	return dbCli
+}
+
 //FlowConsumeCallback 用于消费pulsar的
 func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
 	flow := &server.SingleFlow{}
@@ -50,8 +55,7 @@ func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
 
 	// 构造请求语句
 	query := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
-		"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(),
-		utils.GetIndex(flow.GetUid()))
+		"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(), utils.GetIndex(flow.GetUid()))
 	param := []interface{}{
 		flow.GetUid(), flow.GetOid(), flow.GetAppid(), flow.GetType(), flow.GetOpt(), flow.GetIntegral(), flow.GetTimestamp(), flow.GetTime(), flow.GetDesc(),
 	}

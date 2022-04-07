@@ -1,8 +1,12 @@
 package redishandler
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"integral/dao"
 	"integral/server"
+	"integral/utils"
 )
 
 // @Author: Feng
@@ -12,4 +16,31 @@ import (
 func (r *redisHandler) QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlowRsp) error {
 
 	return nil
+}
+
+//queryFlow 查询积分流水
+func queryFlow(ctx *gin.Context, req *server.QueryFlowReq) ([]*server.SingleFlow, error) {
+	// 构造
+	var flows []*server.SingleFlow
+	query := fmt.Sprintf("select id,oid,appid,type,opt,integral,timestamp,time,"+
+		"desc from DBIntegralFlow_%v.tbIntegralFlow_%v where id=? order by timestamp desc limit ?,?", req.GetAppid(), utils.GetIndex(req.GetUid()))
+	param := []interface{}{req.GetUid(), req.GetOffset(), req.GetNum()}
+
+	// 请求
+	rows, err := dao.GetDBClient().QueryContext(ctx, query, param...)
+	if err != nil {
+		log.Errorf("Query Flow Error %v", err)
+		return nil, err
+	}
+
+	// 解析返回
+	for rows.Next() {
+		f := &server.SingleFlow{}
+		err := rows.Scan(&f.Uid, &f.Oid, &f.Appid, &f.Type, f.Opt, &f.Integral, &f.Timestamp, &f.Time, &f.Desc)
+		if err != nil {
+			continue
+		}
+		flows = append(flows, f)
+	}
+	return flows, nil
 }

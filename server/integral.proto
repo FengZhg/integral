@@ -23,10 +23,6 @@ message QueryReq {
 	string          type  = 3; // 类型
 }
 
-message SingleQuery {
-
-}
-
 message QueryRsp {
 	repeated SingleQueryRsp usersRsp = 1; // 查询的返回结果
 }
@@ -62,10 +58,11 @@ message RollbackReq {
 message RollbackRsp {}
 
 message QueryFlowReq {
-	string uid   = 1; // 用户id
-	string appid = 2; // 积分id
-	string type  = 3; // 积分类型
-	int32  num   = 4; // 请求的流水条数
+	string uid    = 1; // 用户id
+	string appid  = 2; // 积分id
+	string type   = 3; // 积分类型
+	int32  num    = 4; // 请求的流水条数
+	int32  offset = 5; // 流水偏移量
 }
 
 message QueryFlowRsp {
