@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
+	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/model"
 	"integral/server"
@@ -54,18 +55,37 @@ func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
 	}
 
 	// 构造请求语句
-	query := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
-		"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(), utils.GetIndex(flow.GetUid()))
+	insertFlowSql := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
+		"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(), utils.GetDBIndex(flow.GetUid()))
 	param := []interface{}{
 		flow.GetUid(), flow.GetOid(), flow.GetAppid(), flow.GetType(), flow.GetOpt(), flow.GetIntegral(), flow.GetTimestamp(), flow.GetTime(), flow.GetDesc(),
 	}
 
 	// 生成带超时的ctx
 	ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
-	_, err = dbCli.ExecContext(ctx, query, param...)
+	_, err = dbCli.ExecContext(ctx, insertFlowSql, param...)
 	if err != nil {
 		log.Errorf("Mysql Insert Error %v", err)
 		return err
 	}
+	return nil
+}
+
+//ExecTransaction 执行mysql语句
+func ExecTransaction(ctx *gin.Context, handler func(*gin.Context, *sql.Tx) error) error {
+	// 开始事务
+	tx, err := dbCli.Begin()
+	if err != nil {
+		log.Errorf("Transaction Begin Error err = %v", err)
+		return err
+	}
+
+	err = handler(ctx, tx)
+	if err != nil {
+		log.Errorf("Run Transaction Error err = %v", err)
+		tx.Rollback()
+		return err
+	}
+	tx.Commit()
 	return nil
 }

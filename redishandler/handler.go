@@ -7,11 +7,11 @@ import (
 // @Author: Feng
 // @Date: 2022/3/25 17:46
 
-type redisHandler struct{}
+type RedisHandler struct{}
 
 func init() {
 	// 注册基于redis的积分处理器
-	logic.RegisterIntegralHandler("10000", &redisHandler{})
+	logic.RegisterIntegralHandler("10000", &RedisHandler{})
 }
 
 // lua 脚本传入参数统一格式

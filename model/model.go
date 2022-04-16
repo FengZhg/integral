@@ -6,6 +6,7 @@ import "integral/dao/pulsarClient"
 // @Date: 2022/4/4 20:09
 
 var (
+	//PulsarOpt 参数情况
 	PulsarOpt = pulsarClient.NewPulsarOptions(
 		pulsarClient.WithUrl(PulsarUrl),
 		pulsarClient.WithTopic(PulsarTopic),

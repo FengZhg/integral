@@ -15,7 +15,7 @@ import (
 // @Date: 2022/3/25 17:46
 
 //Modify Redis处理器的修改函数
-func (r *redisHandler) Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error {
+func (r *RedisHandler) Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error {
 	// 构造流水字符串
 	flowByte, err := json.Marshal(req)
 	if err != nil {

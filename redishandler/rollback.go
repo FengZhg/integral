@@ -15,7 +15,7 @@ import (
 // @Date: 2022/3/26 14:14
 
 //Rollback Redis处理器回滚
-func (r *redisHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
+func (r *RedisHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
 	// 进行回滚获取流水
 	flowStr, err := doRollback(ctx, req)
 	if err != nil {

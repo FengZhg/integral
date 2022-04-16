@@ -79,4 +79,5 @@ message SingleFlow {
 	uint64 timestamp = 7; // 操作时间戳
 	string time      = 8; // 操作时间
 	string desc      = 9; // 该修改操作描述
+	bool   rollback  = 10;// 回滚标志
 }
