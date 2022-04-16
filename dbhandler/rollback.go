@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
+	"integral/dao"
 	"integral/model"
 	"integral/server"
 	"integral/utils"
@@ -14,7 +16,12 @@ import (
 
 //Rollback Redis处理器回滚
 func (d *dbHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
-
+	// 执行回滚事务
+	err := dao.ExecTransaction(ctx, getRollbackTransaction(ctx, req))
+	if err != nil {
+		log.Errorf("Exec Transaction Error %v", err)
+		return err
+	}
 	return nil
 }
 
@@ -25,7 +32,8 @@ func getRollbackTransaction(ctx *gin.Context, req *server.RollbackReq) func(*gin
 
 	return func(ctx *gin.Context, tx *sql.Tx) error {
 		// 查询回滚记录
-		queryFlowSql := fmt.Sprintf("select opt,integral,timestamp,rollback from DBIntegralFlow_%v.tbIntegralFlow_%v where appid = ? and type = ? and id = ? and oid = ?;", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
+		queryFlowSql := fmt.Sprintf("select opt,integral,timestamp,rollback from DBIntegralFlow_%v.tbIntegralFlow_%v "+
+			"where appid = ? and type = ? and id = ? and oid = ?;", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
 		row := tx.QueryRowContext(ctx, queryFlowSql, req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid())
 		if row.Err() != nil {
 			return row.Err()
@@ -39,12 +47,39 @@ func getRollbackTransaction(ctx *gin.Context, req *server.RollbackReq) func(*gin
 		if flow.GetRollback() == true {
 			return model.AlreadyRollbackError
 		}
+		// 修改流水标志
+		updateFlowSql := fmt.Sprintf("update DBIntegralFlow_%v.tbIntegralFlow_%v set rollback = true "+
+			"where appid = ? and type = ? and id = ? and oid = ? and rollback = false;", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
+		re, err := tx.ExecContext(ctx, updateFlowSql, req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid())
+		if row.Err() != nil {
+			return row.Err()
+		}
+		aff, err := re.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if aff == 0 {
+			return model.UpdateUnexpectedError
+		}
 		// 处理回滚需要的数据
 		integral := flow.GetIntegral()
 		if flow.GetOpt() == 1 {
 			integral = -1 * integral
 		}
-		rollback
+		// 更新余额
+		updateIntegralSql := fmt.Sprintf("update DBIntegral_%v.tbIntegral_%v set integral = integral + ? "+
+			"where appid = ? and type = ? and id = ?", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
+		re, err = tx.ExecContext(ctx, updateIntegralSql, integral, req.GetAppid(), req.GetType(), req.GetUid())
+		if err != nil {
+			return err
+		}
+		aff, err = re.RowsAffected()
+		if err != nil {
+			return err
+		}
+		if aff == 0 {
+			return model.UpdateUnexpectedError
+		}
 		return nil
 	}
 }

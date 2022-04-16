@@ -13,6 +13,7 @@ const (
 	errorModifyRepeated      = 10004
 	errorReturnFormat        = 10005
 	errorOrderNotExist       = 10006
+	errorUpdateUnexpected    = 10007
 )
 
 var (
@@ -23,4 +24,5 @@ var (
 	ModifyRepeatedError      = errs.NewError(errorModifyRepeated, "余额已修改，操作重复")
 	ReturnFormatError        = errs.NewError(errorReturnFormat, "Redis返回格式错误")
 	OrderNotExistError       = errs.NewError(errorOrderNotExist, "订单不存在")
+	UpdateUnexpectedError    = errs.NewError(errorUpdateUnexpected, "数据库操作意外异常")
 )
