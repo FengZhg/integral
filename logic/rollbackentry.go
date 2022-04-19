@@ -4,14 +4,13 @@ import (
 	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 15:44
 
 //Rollback 回滚流水
-func Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
+func Rollback(ctx *gin.Context, req *RollbackReq, rsp *RollbackRsp) error {
 	//参数校验
 	if err := checkRollback(ctx, req); err != nil {
 		return err
@@ -26,7 +25,7 @@ func Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp
 }
 
 //checkRollback 参数校验
-func checkRollback(ctx *gin.Context, req *server.RollbackReq) error {
+func checkRollback(ctx *gin.Context, req *RollbackReq) error {
 	if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() || req.GetOid() == "" || req.GetType() == "" || req.GetAppid() == "" {
 		return model.ParamError
 	}

@@ -4,14 +4,13 @@ import (
 	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 15:46
 
 //QueryFlow 查询积分流水
-func QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlowRsp) error {
+func QueryFlow(ctx *gin.Context, req *QueryFlowReq, rsp *QueryFlowRsp) error {
 
 	// 参数校验
 	if err := checkQueryFlow(ctx, req); err != nil {
@@ -27,7 +26,7 @@ func QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlow
 }
 
 //checkQueryFlow 参数校验
-func checkQueryFlow(ctx *gin.Context, req *server.QueryFlowReq) error {
+func checkQueryFlow(ctx *gin.Context, req *QueryFlowReq) error {
 
 	loginInfo := goJwt.GetLoginInfo(ctx)
 	if loginInfo.GetUid() != req.GetUid() || req.GetType() == "" || req.GetAppid() == "" || req.GetNum() < 0 {

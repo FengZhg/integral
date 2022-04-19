@@ -1,5 +1,6 @@
-CREATE DATABASE if not exists DBIntegralFlow_$i;
-create table if not exists DBIntegralFlow_$i.tbIntegralFlow_$j
+drop DATABASE if exists DBIntegralFlow_$appid;
+create database DBIntegralFlow_$appid;
+create table if not exists DBIntegralFlow_$appid.tbIntegralFlow_$i
 (
     appid     VARCHAR(64)     NOT NULL DEFAULT '',
     type      VARCHAR(64)     NOT NULL DEFAULT '',
@@ -8,21 +9,21 @@ create table if not exists DBIntegralFlow_$i.tbIntegralFlow_$j
     opt       INT             not null default 0,
     integral  BIGINT UNSIGNED not null default 0,
     time      VARCHAR(64)     NOT NULL DEFAULT '',
-    desc      VARCHAR(256)    not null default '',
     timestamp BIGINT UNSIGNED NOT NULL DEFAULT 0,
     rollback  bool            not null default false,
-    primary key (appid, type, id, oid)
+    primary key (appid, type, id, oid),
+    index (appid, type, id, timestamp)
 ) ENGINE = innodb
   DEFAULT CHARSET = utf8;
 
-create database if not exists DBIntegral_$i;
-create table if not exists DBIntegral_$i.tbIntegral_$j
+drop database if exists DBIntegral_$appid;
+create database DBIntegral_$appid;
+create table if not exists DBIntegral_$appid.tbIntegral_$i
 (
     appid    VARCHAR(64)     NOT NULL DEFAULT '',
     type     VARCHAR(64)     NOT NULL DEFAULT '',
     id       VARCHAR(64)     NOT NULL DEFAULT '',
     integral BIGINT UNSIGNED not null default 0,
-    desc     VARCHAR(256)    not null default '',
     primary key (appid, type, id)
 ) engine = innodb
   default charset = utf8;

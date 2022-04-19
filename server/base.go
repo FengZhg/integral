@@ -13,7 +13,7 @@ import (
 //queryBase 积分查询基本函数
 func queryBase(ctx *gin.Context) {
 	// pb反序列化填充req
-	req, rsp := &QueryReq{}, &QueryRsp{}
+	req, rsp := &logic.QueryReq{}, &logic.QueryRsp{}
 	err := ctx.ShouldBind(req)
 	if err != nil {
 		log.Errorf("Should Bind Req Error interface = Query Request = %v err = %v", ctx.Request, err)
@@ -35,7 +35,7 @@ func queryBase(ctx *gin.Context) {
 //modifyBase 积分修改基本函数
 func modifyBase(ctx *gin.Context) {
 	// pb反序列化填充req
-	req, rsp := &ModifyReq{}, &ModifyRsp{}
+	req, rsp := &logic.ModifyReq{}, &logic.ModifyRsp{}
 	err := ctx.ShouldBind(req)
 	if err != nil {
 		log.Errorf("Should Bind Req Error interface = Modify Request = %v err = %v", ctx.Request, err)
@@ -57,7 +57,7 @@ func modifyBase(ctx *gin.Context) {
 //rollbackBase 积分修改回滚基本函数
 func rollbackBase(ctx *gin.Context) {
 	// pb反序列化填充req
-	req, rsp := &RollbackReq{}, &RollbackRsp{}
+	req, rsp := &logic.RollbackReq{}, &logic.RollbackRsp{}
 	err := ctx.ShouldBind(req)
 	if err != nil {
 		log.Errorf("Should Bind Req Error interface = Rollback Request = %v err = %v", ctx.Request, err)
@@ -79,7 +79,7 @@ func rollbackBase(ctx *gin.Context) {
 //queryFlowBase 查询积分流水基本函数
 func queryFlowBase(ctx *gin.Context) {
 	// pb反序列化填充req
-	req, rsp := &QueryFlowReq{}, &QueryFlowRsp{}
+	req, rsp := &logic.QueryFlowReq{}, &logic.QueryFlowRsp{}
 	err := ctx.ShouldBind(req)
 	if err != nil {
 		log.Errorf("Should Bind Req Error interface = QueryFlow Request = %v err = %v", ctx.Request, err)

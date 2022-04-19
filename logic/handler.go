@@ -2,7 +2,6 @@ package logic
 
 import (
 	"github.com/gin-gonic/gin"
-	"integral/server"
 	"sync"
 )
 
@@ -10,10 +9,10 @@ import (
 // @Date: 2022/3/25 15:43
 
 type integralHandler interface {
-	Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error
-	Query(ctx *gin.Context, req *server.QueryReq, rsp *server.QueryRsp) error
-	QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlowRsp) error
-	Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error
+	Modify(ctx *gin.Context, req *ModifyReq, rsp *ModifyRsp) error
+	Query(ctx *gin.Context, req *QueryReq, rsp *QueryRsp) error
+	QueryFlow(ctx *gin.Context, req *QueryFlowReq, rsp *QueryFlowRsp) error
+	Rollback(ctx *gin.Context, req *RollbackReq, rsp *RollbackRsp) error
 }
 
 var (

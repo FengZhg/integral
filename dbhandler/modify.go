@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
+	"integral/logic"
 	"integral/model"
-	"integral/server"
 	"integral/utils"
 	"time"
 )
@@ -15,7 +15,7 @@ import (
 // @Author: Feng
 // @Date: 2022/4/7 14:59
 
-func (d *dbHandler) Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error {
+func (d *dbHandler) Modify(ctx *gin.Context, req *logic.ModifyReq, rsp *logic.ModifyRsp) error {
 	// 修改积分
 	err := dao.ExecTransaction(ctx, getModifyTransaction(ctx, req))
 	if err != nil {
@@ -26,7 +26,7 @@ func (d *dbHandler) Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.
 }
 
 //getModifyTransaction 获取执行事务中的具体操作的闭包
-func getModifyTransaction(ctx *gin.Context, req *server.ModifyReq) func(*gin.Context, *sql.Tx) error {
+func getModifyTransaction(ctx *gin.Context, req *logic.ModifyReq) func(*gin.Context, *sql.Tx) error {
 	// 处理预差值
 	difBalance := req.GetIntegral()
 	if req.GetOpt() == model.DescType {
@@ -36,11 +36,10 @@ func getModifyTransaction(ctx *gin.Context, req *server.ModifyReq) func(*gin.Con
 	// 构造闭包
 	return func(context *gin.Context, tx *sql.Tx) error {
 		// 修改余额
-		modifySql := fmt.Sprintf("inset into DBIntegral_%v.tbIntegral_%v(appid,type,id,integral,desc) "+
+		modifySql := fmt.Sprintf("inset into DBIntegral_%v.tbIntegral(appid,type,id,integral) "+
 			"value(?,?,?,?,?) on duplicate key update set integral = integral + ? where appid = ? and type = ? and id"+
-			" = ?;",
-			req.GetAppid(), utils.GetDBIndex(req.GetUid()))
-		_, err := tx.Exec(modifySql, req.GetAppid(), req.GetType(), req.GetUid(), difBalance, req.GetDesc(),
+			" = ?;", req.GetAppid())
+		_, err := tx.Exec(modifySql, req.GetAppid(), req.GetType(), req.GetUid(), difBalance,
 			difBalance, req.GetAppid(), req.GetType(), req.GetUid())
 		if err != nil {
 			return err
@@ -48,10 +47,10 @@ func getModifyTransaction(ctx *gin.Context, req *server.ModifyReq) func(*gin.Con
 
 		// 插入流水
 		insertFlowSql := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
-			"oid,appid,type,opt,integral,timestamp,time,desc) value(?,?,?,?,?,?,?,?,?);", req.GetAppid(),
+			"oid,appid,type,opt,integral,timestamp,time) value(?,?,?,?,?,?,?,?,?);", req.GetAppid(),
 			utils.GetDBIndex(req.GetUid()))
 		_, err = tx.Exec(insertFlowSql, req.GetUid(), req.GetOid(), req.GetAppid(), req.GetType(), req.GetOpt(), req.GetIntegral(),
-			now.UnixNano(), now.Format("2006-01-02 15:04:05"), req.GetDesc())
+			now.UnixNano(), now.Format("2006-01-02 15:04:05"))
 		if err != nil {
 			return err
 		}

@@ -6,8 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
+	"integral/logic"
 	"integral/model"
-	"integral/server"
 	"integral/utils"
 )
 
@@ -15,7 +15,7 @@ import (
 // @Date: 2022/4/11 20:21
 
 //Rollback Redis处理器回滚
-func (d *dbHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
+func (d *dbHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *logic.RollbackRsp) error {
 	// 执行回滚事务
 	err := dao.ExecTransaction(ctx, getRollbackTransaction(ctx, req))
 	if err != nil {
@@ -26,9 +26,9 @@ func (d *dbHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *ser
 }
 
 //getRollbackTransaction
-func getRollbackTransaction(ctx *gin.Context, req *server.RollbackReq) func(*gin.Context, *sql.Tx) error {
+func getRollbackTransaction(ctx *gin.Context, req *logic.RollbackReq) func(*gin.Context, *sql.Tx) error {
 	// 预构造flow结构体
-	flow := &server.SingleFlow{}
+	flow := &logic.SingleFlow{}
 
 	return func(ctx *gin.Context, tx *sql.Tx) error {
 		// 查询回滚记录

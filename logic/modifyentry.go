@@ -4,14 +4,13 @@ import (
 	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 15:43
 
 //Modify 逻辑函数
-func Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error {
+func Modify(ctx *gin.Context, req *ModifyReq, rsp *ModifyRsp) error {
 
 	// 参数校验
 	err := checkModify(ctx, req)
@@ -28,7 +27,7 @@ func Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) erro
 }
 
 //checkModify 参数校验
-func checkModify(ctx *gin.Context, req *server.ModifyReq) error {
+func checkModify(ctx *gin.Context, req *ModifyReq) error {
 	// 校验
 	if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() {
 		return model.ParamError

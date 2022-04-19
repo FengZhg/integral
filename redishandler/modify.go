@@ -7,15 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
 	"integral/dao/pulsarClient"
+	"integral/logic"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 17:46
 
 //Modify Redis处理器的修改函数
-func (r *RedisHandler) Modify(ctx *gin.Context, req *server.ModifyReq, rsp *server.ModifyRsp) error {
+func (r *RedisHandler) Modify(ctx *gin.Context, req *logic.ModifyReq, rsp *logic.ModifyRsp) error {
 	// 构造流水字符串
 	flowByte, err := json.Marshal(req)
 	if err != nil {
@@ -59,7 +59,7 @@ const (
 )
 
 //modifyBalance 余额修改
-func modifyBalance(ctx *gin.Context, req *server.ModifyReq, flow string) (int64, error) {
+func modifyBalance(ctx *gin.Context, req *logic.ModifyReq, flow string) (int64, error) {
 	// 构造key和参数
 	keys := []string{
 		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),

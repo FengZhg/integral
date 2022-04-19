@@ -3,14 +3,13 @@ package logic
 import (
 	"github.com/gin-gonic/gin"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 15:34
 
 //Query 积分查询
-func Query(ctx *gin.Context, req *server.QueryReq, rsp *server.QueryRsp) error {
+func Query(ctx *gin.Context, req *QueryReq, rsp *QueryRsp) error {
 
 	// 参数校验
 	if err := checkQuery(req); err != nil {
@@ -26,7 +25,7 @@ func Query(ctx *gin.Context, req *server.QueryReq, rsp *server.QueryRsp) error {
 }
 
 //checkQuery 参数校验
-func checkQuery(req *server.QueryReq) error {
+func checkQuery(req *QueryReq) error {
 	if req.GetType() == "" || req.GetAppid() == "" || len(req.GetUids()) == 0 {
 		return model.ParamError
 	}

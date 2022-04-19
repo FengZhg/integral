@@ -7,15 +7,15 @@ import (
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
 	"integral/dao/pulsarClient"
+	"integral/logic"
 	"integral/model"
-	"integral/server"
 )
 
 // @Author: Feng
 // @Date: 2022/3/26 14:14
 
 //Rollback Redis处理器回滚
-func (r *RedisHandler) Rollback(ctx *gin.Context, req *server.RollbackReq, rsp *server.RollbackRsp) error {
+func (r *RedisHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *logic.RollbackRsp) error {
 	// 进行回滚获取流水
 	flowStr, err := doRollback(ctx, req)
 	if err != nil {
@@ -56,7 +56,7 @@ const (
 )
 
 //doRollback 操作进行回滚
-func doRollback(ctx *gin.Context, req *server.RollbackReq) (string, error) {
+func doRollback(ctx *gin.Context, req *logic.RollbackReq) (string, error) {
 	// 构造请求参数
 	keys := []string{
 		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
@@ -94,7 +94,7 @@ func doRollback(ctx *gin.Context, req *server.RollbackReq) (string, error) {
 //buildFlowBytes 构造流水payload
 func buildFlowBytes(flowStr string) ([]byte, error) {
 	// 反序列化flow
-	flow := server.SingleFlow{}
+	flow := logic.SingleFlow{}
 	err := json.Unmarshal([]byte(flowStr), &flow)
 	if err != nil {
 		log.Errorf("Unmarshal Flow from Pulsar Message Error %v", err)
@@ -109,7 +109,6 @@ func buildFlowBytes(flowStr string) ([]byte, error) {
 	} else {
 		return nil, model.ParamError
 	}
-	flow.Desc = "订单回滚：" + flow.Desc
 
 	// 序列化流水
 	flowBytes, err := json.Marshal(flow)

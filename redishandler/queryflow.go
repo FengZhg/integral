@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
-	"integral/server"
+	"integral/logic"
 	"integral/utils"
 )
 
@@ -13,7 +13,7 @@ import (
 // @Date: 2022/3/26 14:08
 
 //QueryFlow Redis处理器查询积分流水
-func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp *server.QueryFlowRsp) error {
+func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *logic.QueryFlowReq, rsp *logic.QueryFlowRsp) error {
 
 	// 查询流水
 	flows, err := queryFlow(ctx, req)
@@ -26,11 +26,11 @@ func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *server.QueryFlowReq, rsp
 }
 
 //queryFlow 查询积分流水
-func queryFlow(ctx *gin.Context, req *server.QueryFlowReq) ([]*server.SingleFlow, error) {
+func queryFlow(ctx *gin.Context, req *logic.QueryFlowReq) ([]*logic.SingleFlow, error) {
 	// 构造
-	var flows []*server.SingleFlow
+	var flows []*logic.SingleFlow
 	query := fmt.Sprintf("select id,oid,appid,type,opt,integral,timestamp,time,"+
-		"desc,rollback from DBIntegralFlow_%v.tbIntegralFlow_%v where id=? order by timestamp desc limit ?,?",
+		"rollback from DBIntegralFlow_%v.tbIntegralFlow_%v where id=? order by timestamp desc limit ?,?",
 		req.GetAppid(), utils.GetDBIndex(req.GetUid()))
 	param := []interface{}{req.GetUid(), req.GetOffset(), req.GetNum()}
 
@@ -43,8 +43,8 @@ func queryFlow(ctx *gin.Context, req *server.QueryFlowReq) ([]*server.SingleFlow
 
 	// 解析返回
 	for rows.Next() {
-		f := &server.SingleFlow{}
-		err := rows.Scan(&f.Uid, &f.Oid, &f.Appid, &f.Type, f.Opt, &f.Integral, &f.Timestamp, &f.Time, &f.Desc, &f.Rollback)
+		f := &logic.SingleFlow{}
+		err := rows.Scan(&f.Uid, &f.Oid, &f.Appid, &f.Type, f.Opt, &f.Integral, &f.Timestamp, &f.Time, &f.Rollback)
 		if err != nil {
 			continue
 		}

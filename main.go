@@ -13,7 +13,10 @@ import (
 
 func main() {
 	engine := server.NewServer()
-	engine.Run("0.0.0.0:10000")
+	err := engine.Run("0.0.0.0:10000")
+	if err != nil {
+		panic(err)
+	}
 }
 
 // 初始化
@@ -23,7 +26,7 @@ func init() {
 
 func initPulsarConsumer() {
 	// 启动消费者守护协程
-	pulsarClient.NewPulsarConsumerDaemon(
+	go pulsarClient.NewPulsarConsumerDaemon(
 		model.PulsarOpt,
 		dao.FlowConsumeCallback,
 	).Start()

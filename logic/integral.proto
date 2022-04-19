@@ -41,7 +41,6 @@ message ModifyReq {
 	int32  opt      = 4; // 操作类型 1：增加余额  2：扣除余额
 	string oid      = 5; // 订单id 唯一标识一个订单
 	int64  integral = 6; // 需要操作的余额数量
-	string desc     = 8; // 该修改操作描述
 }
 
 message ModifyRsp {
@@ -78,6 +77,5 @@ message SingleFlow {
 	uint64 integral  = 6; // 操作的余额数量
 	uint64 timestamp = 7; // 操作时间戳
 	string time      = 8; // 操作时间
-	string desc      = 9; // 该修改操作描述
 	bool   rollback  = 10;// 回滚标志
 }
