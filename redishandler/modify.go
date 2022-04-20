@@ -7,17 +7,17 @@ import (
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
 	"integral/dao/pulsarClient"
-	"integral/logic"
 	"integral/model"
+	"time"
 )
 
 // @Author: Feng
 // @Date: 2022/3/25 17:46
 
 //Modify Redis处理器的修改函数
-func (r *RedisHandler) Modify(ctx *gin.Context, req *logic.ModifyReq, rsp *logic.ModifyRsp) error {
-	// 构造流水字符串
-	flowByte, err := json.Marshal(req)
+func (r *RedisHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.ModifyRsp) error {
+	// 构造流水
+	flowByte, err := buildFlowByte(ctx, req)
 	if err != nil {
 		log.Errorf("Build Flow Error %v", err)
 		return err
@@ -27,6 +27,7 @@ func (r *RedisHandler) Modify(ctx *gin.Context, req *logic.ModifyReq, rsp *logic
 	balance, err := modifyBalance(ctx, req, string(flowByte))
 	if err != nil {
 		log.Errorf("Modify Redis Error %v", err)
+		return err
 	}
 
 	// 发送生产pulsar消息
@@ -43,23 +44,23 @@ func (r *RedisHandler) Modify(ctx *gin.Context, req *logic.ModifyReq, rsp *logic
 // 定义余额修改lua脚本
 const (
 	modifyScript = `
-	if tonumber(redis.call('EXISTS', KEYS[2])) == 1 then 
-		return {"", 10004}
+	if tonumber(redis.call('EXISTS', KEYS[1])) == 1 then 
+		return {0, 10004}
 	end
 	local flow = ARGV[2]
 	local absBalance = tonumber(ARGV[1]) or 0
-	local balance = tonumber(redis.call('GET', KEYS[1])) or 0
+	local balance = tonumber(redis.call('GET', KEYS[2])) or 0
 	if balance + absBalance < 0 then 
 		return {0,10002}
 	end
-	redis.call('SETEX', KEYS[2], 2419200, absBalance)
+	redis.call('SETEX', KEYS[1], 2419200, absBalance)
 	redis.call('SETEX', KEYS[3], 2419200, flow)
-	return {tonumber(redis.call('INCRBY',KEYS[1], absBalance)), 0}
+	return {tonumber(redis.call('INCRBY',KEYS[2], absBalance)), 0}
 `
 )
 
 //modifyBalance 余额修改
-func modifyBalance(ctx *gin.Context, req *logic.ModifyReq, flow string) (int64, error) {
+func modifyBalance(ctx *gin.Context, req *model.ModifyReq, flow string) (int64, error) {
 	// 构造key和参数
 	keys := []string{
 		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
@@ -67,7 +68,7 @@ func modifyBalance(ctx *gin.Context, req *logic.ModifyReq, flow string) (int64, 
 		getFlowKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 	}
 	integral := req.GetIntegral()
-	if req.GetOpt() == 2 {
+	if req.GetOpt() == model.DescType {
 		integral = -1 * integral
 	}
 	param := []interface{}{integral, flow}
@@ -89,6 +90,24 @@ func modifyBalance(ctx *gin.Context, req *logic.ModifyReq, flow string) (int64, 
 		log.Errorf("lua Return Error %v", err)
 		return 0, err
 	}
-
 	return balance, nil
+}
+
+//buildFlowByte 构造流水
+func buildFlowByte(ctx *gin.Context, req *model.ModifyReq) ([]byte, error) {
+	// 构造
+	now := time.Now()
+	flow := &model.SingleFlow{
+		Appid:     req.GetAppid(),
+		Type:      req.GetType(),
+		Oid:       req.GetOid(),
+		Opt:       req.GetOpt(),
+		Uid:       req.GetUid(),
+		Integral:  req.GetIntegral(),
+		Time:      now.Format("2006-01-02 15:04:05"),
+		Timestamp: uint64(now.UnixNano()),
+		Rollback:  false,
+	}
+	// 构造流水字符串
+	return json.Marshal(flow)
 }

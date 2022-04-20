@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
-	"integral/logic"
+	"integral/model"
 	"integral/utils"
 )
 
@@ -13,7 +13,7 @@ import (
 // @Date: 2022/4/11 20:20
 
 //Query 余额修改
-func (d *dbHandler) Query(ctx *gin.Context, req *logic.QueryReq, rsp *logic.QueryRsp) error {
+func (d *dbHandler) Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
 	for _, uid := range req.GetUids() {
 		subRsp, err := doQuery(ctx, uid, req.GetType(), req.GetAppid())
 		if err != nil {
@@ -26,9 +26,9 @@ func (d *dbHandler) Query(ctx *gin.Context, req *logic.QueryReq, rsp *logic.Quer
 }
 
 //doQuery 进行查询
-func doQuery(ctx *gin.Context, uid, tid, appid string) (*logic.SingleQueryRsp, error) {
+func doQuery(ctx *gin.Context, uid, tid, appid string) (*model.SingleQueryRsp, error) {
 	//构造查询语句
-	querySql := fmt.Sprintf("select integral from DBIntegral_%v.tbIntegral_%v where appid = ? and type = ? id = ?;",
+	querySql := fmt.Sprintf("select integral from DBIntegral_%v.tbIntegral_%v where appid = ? and type = ? and id = ?;",
 		appid, utils.GetDBIndex(uid))
 	row := dao.GetDBClient().QueryRow(querySql, appid, tid, uid)
 	if row.Err() != nil {
@@ -40,7 +40,7 @@ func doQuery(ctx *gin.Context, uid, tid, appid string) (*logic.SingleQueryRsp, e
 	if err != nil {
 		return nil, err
 	}
-	return &logic.SingleQueryRsp{
+	return &model.SingleQueryRsp{
 		Appid:    appid,
 		Type:     tid,
 		Integral: integral,

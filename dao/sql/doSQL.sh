@@ -4,10 +4,14 @@ path=./integral.sql
 appids=(10000 10001)
 
 for appid in ${appids[*]}; do
-  for (i=0;i<=1000;i++); do
+  echo """
+        drop DATABASE if exists DBIntegralFlow_$appid;
+        create database DBIntegralFlow_$appid;
+        drop database if exists DBIntegral_$appid;
+        create database DBIntegral_$appid;
+  """ >> $path
+  for ((i=0;i<=1000;i++)); do
     echo """
-      drop DATABASE if exists DBIntegralFlow_$appid;
-      create database DBIntegralFlow_$appid;
       create table if not exists DBIntegralFlow_$appid.tbIntegralFlow_$i
       (
           appid     VARCHAR(64)     NOT NULL DEFAULT '',
@@ -22,8 +26,6 @@ for appid in ${appids[*]}; do
           primary key(appid,type,id,oid),
           index(appid, type,id,timestamp)
       ) ENGINE=innodb DEFAULT CHARSET=utf8;
-      drop database if exists DBIntegral_$appid;
-      create database DBIntegral_$appid;
       create table if not exists DBIntegral_$appid.tbIntegral_$i
       (
           appid    VARCHAR(64)     NOT NULL DEFAULT '',

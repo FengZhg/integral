@@ -9,7 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	log "github.com/sirupsen/logrus"
-	"integral/logic"
 	"integral/model"
 	"integral/utils"
 	"time"
@@ -47,7 +46,7 @@ func GetDBClient() *sql.DB {
 
 //FlowConsumeCallback 用于消费pulsar的
 func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
-	flow := &logic.SingleFlow{}
+	flow := &model.SingleFlow{}
 	// 反序列化语句
 	err := json.Unmarshal(msg.Payload(), flow)
 	if err != nil {
@@ -57,7 +56,7 @@ func FlowConsumeCallback(msg pulsar.ConsumerMessage) error {
 
 	// 构造请求语句
 	insertFlowSql := fmt.Sprintf("insert into DBIntegralFlow_%v.tbIntegralFlow_%v(id,"+
-		"oid,appid,type,opt,integral,timestamp,time) value(?,?,?,?,?,?,?,?,?);", flow.GetAppid(), utils.GetDBIndex(flow.GetUid()))
+		"oid,appid,type,opt,integral,timestamp,time) value(?,?,?,?,?,?,?,?);", flow.GetAppid(), utils.GetDBIndex(flow.GetUid()))
 	param := []interface{}{
 		flow.GetUid(), flow.GetOid(), flow.GetAppid(), flow.GetType(), flow.GetOpt(), flow.GetIntegral(), flow.GetTimestamp(), flow.GetTime(),
 	}

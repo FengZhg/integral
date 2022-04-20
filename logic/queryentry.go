@@ -9,7 +9,7 @@ import (
 // @Date: 2022/3/25 15:34
 
 //Query 积分查询
-func Query(ctx *gin.Context, req *QueryReq, rsp *QueryRsp) error {
+func Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
 
 	// 参数校验
 	if err := checkQuery(req); err != nil {
@@ -25,7 +25,7 @@ func Query(ctx *gin.Context, req *QueryReq, rsp *QueryRsp) error {
 }
 
 //checkQuery 参数校验
-func checkQuery(req *QueryReq) error {
+func checkQuery(req *model.QueryReq) error {
 	if req.GetType() == "" || req.GetAppid() == "" || len(req.GetUids()) == 0 {
 		return model.ParamError
 	}

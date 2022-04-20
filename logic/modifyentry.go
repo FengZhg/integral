@@ -1,6 +1,7 @@
 package logic
 
 import (
+	"fmt"
 	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
@@ -10,7 +11,7 @@ import (
 // @Date: 2022/3/25 15:43
 
 //Modify 逻辑函数
-func Modify(ctx *gin.Context, req *ModifyReq, rsp *ModifyRsp) error {
+func Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.ModifyRsp) error {
 
 	// 参数校验
 	err := checkModify(ctx, req)
@@ -27,9 +28,10 @@ func Modify(ctx *gin.Context, req *ModifyReq, rsp *ModifyRsp) error {
 }
 
 //checkModify 参数校验
-func checkModify(ctx *gin.Context, req *ModifyReq) error {
+func checkModify(ctx *gin.Context, req *model.ModifyReq) error {
 	// 校验
 	if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() {
+		fmt.Println(goJwt.GetLoginInfo(ctx).String(), req.String())
 		return model.ParamError
 	}
 	// 判空

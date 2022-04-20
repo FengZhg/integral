@@ -10,7 +10,7 @@ import (
 // @Date: 2022/3/25 15:46
 
 //QueryFlow 查询积分流水
-func QueryFlow(ctx *gin.Context, req *QueryFlowReq, rsp *QueryFlowRsp) error {
+func QueryFlow(ctx *gin.Context, req *model.QueryFlowReq, rsp *model.QueryFlowRsp) error {
 
 	// 参数校验
 	if err := checkQueryFlow(ctx, req); err != nil {
@@ -26,7 +26,7 @@ func QueryFlow(ctx *gin.Context, req *QueryFlowReq, rsp *QueryFlowRsp) error {
 }
 
 //checkQueryFlow 参数校验
-func checkQueryFlow(ctx *gin.Context, req *QueryFlowReq) error {
+func checkQueryFlow(ctx *gin.Context, req *model.QueryFlowReq) error {
 
 	loginInfo := goJwt.GetLoginInfo(ctx)
 	if loginInfo.GetUid() != req.GetUid() || req.GetType() == "" || req.GetAppid() == "" || req.GetNum() < 0 {

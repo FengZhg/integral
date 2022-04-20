@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/FengZhg/go_tools/gin_middleware"
-	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
+	"integral/logic"
 	"net/http"
 	"os/exec"
 )
@@ -21,18 +21,20 @@ func NewServer() *gin.Engine {
 
 	// 中间件
 	// 超时控制中间件
-	engine.Use(gin_middleware.NewRequestLog(nil, nil).RequestLogMiddleware())
+	engine.Use(gin_middleware.NewRequestLog(nil).RequestLogMiddleware())
 	engine.Use(gin_middleware.ReplyMiddleware())
 	engine.Use(gin_middleware.TimeoutMiddleware())
 
 	// 校验登录态的接口
-	api := engine.Group("api").Use(goJwt.NewES512().AuthMiddleware())
+	api := engine.Group("api").Use(logic.Jwt.AuthMiddleware())
 	{
-		api.POST("Query", queryBase)
-		api.POST("Modify", modifyBase)
-		api.POST("Rollback", rollbackBase)
-		api.POST("QueryFlow", queryFlowBase)
+		api.POST("/Query", queryBase)
+		api.POST("/Modify", modifyBase)
+		api.POST("/Rollback", rollbackBase)
+		api.POST("/QueryFlow", queryFlowBase)
 	}
+
+	engine.POST("/token", generateTokenBase)
 
 	engine.NoRoute(func(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, "Server Started")

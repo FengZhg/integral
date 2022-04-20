@@ -7,7 +7,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
 	"integral/dao/pulsarClient"
-	"integral/logic"
 	"integral/model"
 )
 
@@ -15,7 +14,7 @@ import (
 // @Date: 2022/3/26 14:14
 
 //Rollback Redis处理器回滚
-func (r *RedisHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *logic.RollbackRsp) error {
+func (r *RedisHandler) Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *model.RollbackRsp) error {
 	// 进行回滚获取流水
 	flowStr, err := doRollback(ctx, req)
 	if err != nil {
@@ -41,22 +40,22 @@ func (r *RedisHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *l
 
 const (
 	rollbackScript = `
-	local flow = redis.call('GET', KEYS[3])
-	if flow == nil then
-		return {'', 10003}
-	end
-	local absBalance = tonumber(redis.call('GET', KEYS[2]))
-	if absBalance == nil then
-		return {'', 10006}
-	end
-	redis.call('INCRBY',KEYS[1], -1 * absBalance)
-	redis.call('DEL', KEYS[3])
-	return {flow ,0}
-`
+		local flow = redis.call('GET', KEYS[3])
+		if flow == nil then
+			return {'', 10003}
+		end
+		local absBalance = tonumber(redis.call('GET', KEYS[1]))
+		if absBalance == nil then
+			return {'', 10006}
+		end
+		redis.call('INCRBY',KEYS[2], -1 * absBalance)
+		redis.call('DEL', KEYS[3])
+		return {flow ,0}
+	`
 )
 
 //doRollback 操作进行回滚
-func doRollback(ctx *gin.Context, req *logic.RollbackReq) (string, error) {
+func doRollback(ctx *gin.Context, req *model.RollbackReq) (string, error) {
 	// 构造请求参数
 	keys := []string{
 		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
@@ -76,13 +75,13 @@ func doRollback(ctx *gin.Context, req *logic.RollbackReq) (string, error) {
 
 	// 结果assert
 	flow, okFlow := interSli[0].(string)
-	code, okCode := interSli[1].(int32)
+	code, okCode := interSli[1].(int64)
 	if !okFlow || !okCode {
 		log.Errorf("Parse Rollback Lua Return Error")
 		return "", model.ReturnFormatError
 	}
 
-	err = errs.Code2Error(code)
+	err = errs.Code2Error(int32(code))
 	if err != nil {
 		log.Errorf("lua Return Error %v", err)
 		return "", err
@@ -94,7 +93,7 @@ func doRollback(ctx *gin.Context, req *logic.RollbackReq) (string, error) {
 //buildFlowBytes 构造流水payload
 func buildFlowBytes(flowStr string) ([]byte, error) {
 	// 反序列化flow
-	flow := logic.SingleFlow{}
+	flow := model.SingleFlow{}
 	err := json.Unmarshal([]byte(flowStr), &flow)
 	if err != nil {
 		log.Errorf("Unmarshal Flow from Pulsar Message Error %v", err)

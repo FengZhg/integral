@@ -4,7 +4,9 @@ import (
 	_ "github.com/FengZhg/go_tools/gin_logrus"
 	"integral/dao"
 	"integral/dao/pulsarClient"
+	_ "integral/dbhandler"
 	"integral/model"
+	_ "integral/redishandler"
 	"integral/server"
 )
 

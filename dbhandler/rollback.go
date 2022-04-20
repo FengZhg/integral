@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
-	"integral/logic"
 	"integral/model"
 	"integral/utils"
 )
@@ -15,7 +14,7 @@ import (
 // @Date: 2022/4/11 20:21
 
 //Rollback Redis处理器回滚
-func (d *dbHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *logic.RollbackRsp) error {
+func (d *dbHandler) Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *model.RollbackRsp) error {
 	// 执行回滚事务
 	err := dao.ExecTransaction(ctx, getRollbackTransaction(ctx, req))
 	if err != nil {
@@ -26,9 +25,9 @@ func (d *dbHandler) Rollback(ctx *gin.Context, req *logic.RollbackReq, rsp *logi
 }
 
 //getRollbackTransaction
-func getRollbackTransaction(ctx *gin.Context, req *logic.RollbackReq) func(*gin.Context, *sql.Tx) error {
+func getRollbackTransaction(ctx *gin.Context, req *model.RollbackReq) func(*gin.Context, *sql.Tx) error {
 	// 预构造flow结构体
-	flow := &logic.SingleFlow{}
+	flow := &model.SingleFlow{}
 
 	return func(ctx *gin.Context, tx *sql.Tx) error {
 		// 查询回滚记录
@@ -62,7 +61,7 @@ func getRollbackTransaction(ctx *gin.Context, req *logic.RollbackReq) func(*gin.
 			return model.UpdateUnexpectedError
 		}
 		// 处理回滚需要的数据
-		integral := flow.GetIntegral()
+		integral := int64(flow.GetIntegral())
 		if flow.GetOpt() == 1 {
 			integral = -1 * integral
 		}

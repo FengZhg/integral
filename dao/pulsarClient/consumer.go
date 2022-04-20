@@ -72,9 +72,9 @@ func (p *pulsarConsumerDaemon) doConsume() error {
 		// 写数据库
 		err := p.procMsgCallback(msg)
 		if err != nil {
-			// 处理错误的五秒后重试
-			consumer.ReconsumeLater(msg, 5*time.Second)
+			log.Errorf("Process Message Error %v", err)
 		}
+		consumer.Ack(msg)
 	}
 	return nil
 }
