@@ -16,3 +16,8 @@
 
 
 .idea/
+
+log/
+
+config/
+model/config.go
