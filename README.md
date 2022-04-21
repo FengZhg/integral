@@ -1,6 +1,7 @@
 # integral
-- 一种积分模块
+- 积分模块
 - 计划进行不同实现方式的性能比较
+- **毕设时间太紧了，对于一些细节没时间去仔细研究了**
 
 
 
@@ -10,7 +11,7 @@
 | Branch Name | 实现方式 | 其他 |
 | ----- | ---- | ---- |
 | normal | 基本普通实现 |  |
-| eventLoop | 为redis、mysql、pulsar建立eventLoop | pulsar-client-go的consumer内部就是eventloop实现的 |
+| flowchart | 通过程序流程图，解耦非必要的串行逻辑 |  |
 | language | 语言层面(协程绑定线程之类的)优化 | 火焰图、函数调用图优化 |
 | kernel | 内核层面优化 | |
 
