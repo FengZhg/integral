@@ -1,7 +1,6 @@
 package pulsarClient
 
 import (
-	"fmt"
 	"github.com/apache/pulsar-client-go/pulsar"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/ratelimit"
@@ -11,25 +10,11 @@ import (
 // @Author: Feng
 // @Date: 2022/3/26 16:55
 
-type pulsarConsumerDaemon struct {
-	option          *pulsarOptions
-	procMsgCallback func(pulsar.ConsumerMessage) error
-}
-
-//NewPulsarConsumerDaemon 新pulsar消费者守护协程
-func NewPulsarConsumerDaemon(option *pulsarOptions,
-	callback func(pulsar.ConsumerMessage) error) *pulsarConsumerDaemon {
-	return &pulsarConsumerDaemon{
-		option:          option,
-		procMsgCallback: callback,
-	}
-}
-
-//Start 启动消费者守护协程
-func (p *pulsarConsumerDaemon) Start() {
+//startConsumer 启动消费者守护协程
+func (p *pulsarConfig) startConsumer() {
 	for {
-		log.Infof("Start Daemon Do Pulsar url:%v  topic:%v", p.option.url, p.option.topic)
-		err := p.doConsume()
+		log.Infof("startConsumer Daemon Do Pulsar url:%v  topic:%v", p.option.url, p.option.topic)
+		err := p.consumerEventLoop()
 		if err != nil {
 			log.Errorf("Consumer Daemon Quit With Error err:%v", err)
 		}
@@ -37,22 +22,10 @@ func (p *pulsarConsumerDaemon) Start() {
 	}
 }
 
-//doConsume 启动消费者
-func (p *pulsarConsumerDaemon) doConsume() error {
-	if p.option == nil || p.procMsgCallback == nil {
-		return fmt.Errorf("pulsarClient Consumer Lack Of Param")
-	}
-	// 获取客户端连接
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: p.option.url,
-	})
-	if err != nil {
-		log.Errorf("Pulsar New Client Error err:%v", err)
-		return err
-	}
-	defer client.Close()
-
-	consumer, err := client.Subscribe(pulsar.ConsumerOptions{
+//consumerEventLoop 启动消费者
+func (p *pulsarConfig) consumerEventLoop() error {
+	// 订阅
+	consumer, err := p.client.Subscribe(pulsar.ConsumerOptions{
 		Topic:            p.option.topic,
 		SubscriptionName: "integral-normal",
 		Type:             pulsar.Shared,
@@ -70,7 +43,7 @@ func (p *pulsarConsumerDaemon) doConsume() error {
 	for msg := range consumer.Chan() {
 		rl.Take()
 		// 写数据库
-		err := p.procMsgCallback(msg)
+		err := p.consumeMsgCB(msg)
 		if err != nil {
 			log.Errorf("Process Message Error %v", err)
 		}

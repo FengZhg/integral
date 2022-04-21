@@ -14,7 +14,6 @@ import (
 
 //QueryFlow Redis处理器查询积分流水
 func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *model.QueryFlowReq, rsp *model.QueryFlowRsp) error {
-
 	// 查询流水
 	flows, err := queryFlow(ctx, req)
 	if err != nil {

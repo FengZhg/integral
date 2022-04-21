@@ -2,10 +2,8 @@ package main
 
 import (
 	_ "github.com/FengZhg/go_tools/gin_logrus"
-	"integral/dao"
-	"integral/dao/pulsarClient"
+	_ "integral/dao/pulsarClient"
 	_ "integral/dbhandler"
-	"integral/model"
 	_ "integral/redishandler"
 	"integral/server"
 )
@@ -19,17 +17,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-// 初始化
-func init() {
-	initPulsarConsumer()
-}
-
-func initPulsarConsumer() {
-	// 启动消费者守护协程
-	go pulsarClient.NewPulsarConsumerDaemon(
-		model.PulsarOpt,
-		dao.FlowConsumeCallback,
-	).Start()
 }

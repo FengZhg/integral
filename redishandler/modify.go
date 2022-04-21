@@ -17,7 +17,7 @@ import (
 //Modify Redis处理器的修改函数
 func (r *RedisHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.ModifyRsp) error {
 	// 构造流水
-	flowByte, err := buildFlowByte(ctx, req)
+	flowByte, err := buildModifyFlow(ctx, req)
 	if err != nil {
 		log.Errorf("Build Flow Error %v", err)
 		return err
@@ -31,11 +31,7 @@ func (r *RedisHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model
 	}
 
 	// 发送生产pulsar消息
-	err = pulsarClient.Send(model.PulsarOpt, flowByte)
-	if err != nil {
-		log.Errorf("Pulsar Send Msg Error %v", err)
-		return err
-	}
+	go pulsarClient.PulsarCfg.Produce(ctx, flowByte)
 
 	rsp.Integral = balance
 	return nil
@@ -93,8 +89,8 @@ func modifyBalance(ctx *gin.Context, req *model.ModifyReq, flow string) (int64, 
 	return balance, nil
 }
 
-//buildFlowByte 构造流水
-func buildFlowByte(ctx *gin.Context, req *model.ModifyReq) ([]byte, error) {
+//buildModifyFlow 构造流水
+func buildModifyFlow(ctx *gin.Context, req *model.ModifyReq) ([]byte, error) {
 	// 构造
 	now := time.Now()
 	flow := &model.SingleFlow{

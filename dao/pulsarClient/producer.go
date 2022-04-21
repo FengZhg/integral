@@ -4,37 +4,28 @@ import (
 	"context"
 	"github.com/apache/pulsar-client-go/pulsar"
 	log "github.com/sirupsen/logrus"
-	"time"
 )
 
 // @Author: Feng
 // @Date: 2022/3/28 13:52
 
-func Send(option *pulsarOptions, payload []byte) error {
-	// 获取客户端连接
-	client, err := pulsar.NewClient(pulsar.ClientOptions{
-		URL: option.url,
-	})
-	if err != nil {
-		log.Errorf("Pulsar New Client Error err:%v", err)
-		return err
-	}
-	defer client.Close()
-
+//initProducer 消息生产事件循环
+func (p *pulsarConfig) initProducer() error {
 	// 获取消费者
-	pd, err := client.CreateProducer(pulsar.ProducerOptions{Topic: option.topic})
+	pd, err := p.client.CreateProducer(pulsar.ProducerOptions{Topic: p.option.topic})
 	if err != nil {
 		log.Errorf("Pulsar New Producer Error err:%v", err)
 		return err
 	}
-	defer pd.Close()
+	p.producer = pd
+	return nil
+}
 
-	// 发送消息
-	ctxWithTimeout, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	_, err = pd.Send(ctxWithTimeout, &pulsar.ProducerMessage{Payload: payload})
+//Produce 生产者生产消息
+func (p *pulsarConfig) Produce(ctx context.Context, msg []byte) error {
+	_, err := p.producer.Send(ctx, &pulsar.ProducerMessage{Payload: msg})
 	if err != nil {
-		log.Errorf("Pulsar Send Message Error err:%v", err)
+		log.Errorf("Pulsar Send Msg Error %v", err)
 		return err
 	}
 	return nil

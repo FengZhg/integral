@@ -1,6 +1,7 @@
 package redishandler
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/FengZhg/go_tools/errs"
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,7 @@ import (
 	"integral/dao"
 	"integral/dao/pulsarClient"
 	"integral/model"
+	"time"
 )
 
 // @Author: Feng
@@ -21,20 +23,9 @@ func (r *RedisHandler) Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *m
 		log.Errorf("Do Rollback Error %v", err)
 		return err
 	}
-
-	// 构建回滚结构
-	flowBytes, err := buildFlowBytes(flowStr)
-	if err != nil {
-		log.Errorf("Build Flow Error %v", err)
-		return err
-	}
-
-	// 回滚丢进pulsar
-	err = pulsarClient.Send(model.PulsarOpt, flowBytes)
-	if err != nil {
-		log.Errorf("Pulsar Send Error %v", err)
-		return err
-	}
+	
+	// 构造并发送流水
+	go doRollbackFlow(flowStr)
 	return nil
 }
 
@@ -90,8 +81,8 @@ func doRollback(ctx *gin.Context, req *model.RollbackReq) (string, error) {
 	return flow, nil
 }
 
-//buildFlowBytes 构造流水payload
-func buildFlowBytes(flowStr string) ([]byte, error) {
+//buildRollbackFlow 构造流水payload
+func buildRollbackFlow(flowStr string) ([]byte, error) {
 	// 反序列化flow
 	flow := model.SingleFlow{}
 	err := json.Unmarshal([]byte(flowStr), &flow)
@@ -116,4 +107,23 @@ func buildFlowBytes(flowStr string) ([]byte, error) {
 		return nil, err
 	}
 	return flowBytes, nil
+}
+
+//doRollbackFlow 进行回滚
+func doRollbackFlow(flowStr string) error {
+	// 构建回滚结构
+	flowBytes, err := buildRollbackFlow(flowStr)
+	if err != nil {
+		log.Errorf("Build Flow Error %v", err)
+		return err
+	}
+
+	// 回滚丢进pulsar
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
+	err = pulsarClient.PulsarCfg.Produce(ctx, flowBytes)
+	if err != nil {
+		log.Errorf("Produce Message Error %v", err)
+		return err
+	}
+	return nil
 }

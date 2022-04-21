@@ -12,19 +12,21 @@ import (
 
 //Query Redis处理器的积分查询函数
 func (r *RedisHandler) Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
-	var queryRsps []*model.SingleQueryRsp
-	for _, uid := range req.GetUids() {
-		balance, err := singleQuery(ctx, req.GetAppid(), req.GetType(), uid)
-		if err != nil {
-			log.Errorf("Query Single User Balance Error %v", err)
-			continue
-		}
-		queryRsps = append(queryRsps, &model.SingleQueryRsp{
-			Uid:      uid,
-			Appid:    req.GetAppid(),
-			Type:     req.GetType(),
-			Integral: balance,
-		})
+	queryRsps := make([]*model.SingleQueryRsp, len(req.GetUids()))
+	for index, uid := range req.GetUids() {
+		go func(idx int, id string) {
+			balance, err := singleQuery(ctx, req.GetAppid(), req.GetType(), uid)
+			if err != nil {
+				log.Errorf("Query Single User Balance Error %v", err)
+				return
+			}
+			queryRsps[idx] = &model.SingleQueryRsp{
+				Uid:      id,
+				Appid:    req.GetAppid(),
+				Type:     req.GetType(),
+				Integral: balance,
+			}
+		}(index, uid)
 	}
 	rsp.UsersRsp = queryRsps
 	return nil
