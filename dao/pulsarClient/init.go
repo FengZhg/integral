@@ -10,11 +10,17 @@ import (
 // @Author: Feng
 // @Date: 2022/4/21 13:19
 
-var PulsarCfg *pulsarConfig
+var (
+	PulsarCfg *pulsarConfig
+	pulsarOpt = NewPulsarOptions(
+		WithUrl(model.PulsarUrl),
+		WithTopic(model.PulsarTopic),
+	)
+)
 
 // 初始化
 func init() {
-	PulsarCfg = NewPulsarConsumerDaemon(model.PulsarOpt, dao.FlowConsumeCallback)
+	PulsarCfg = NewPulsarConsumerDaemon(pulsarOpt, dao.FlowConsumeCallback)
 }
 
 type pulsarConfig struct {

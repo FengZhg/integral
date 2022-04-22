@@ -8,6 +8,7 @@ require (
 	github.com/FengZhg/go_tools/gin_middleware v0.0.0-20220411074546-4d71bd48d487
 	github.com/FengZhg/go_tools/goJwt v0.0.0-20220411074546-4d71bd48d487
 	github.com/apache/pulsar-client-go v0.8.1
+	github.com/gin-contrib/pprof v1.3.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-sql-driver/mysql v1.6.0
