@@ -10,4 +10,5 @@ type dbHandler struct{}
 func init() {
 	// 注册基于db的积分处理器
 	logic.RegisterIntegralHandler("10001", &dbHandler{})
+
 }

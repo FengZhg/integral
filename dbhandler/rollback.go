@@ -31,14 +31,15 @@ func getRollbackTransaction(ctx *gin.Context, req *model.RollbackReq) func(*gin.
 
 	return func(ctx *gin.Context, tx *sql.Tx) error {
 		// 查询回滚记录
-		queryFlowSql := fmt.Sprintf("select opt,integral,timestamp,rollback from DBIntegralFlow_%v.tbIntegralFlow_%v "+
-			"where appid = ? and type = ? and id = ? and oid = ?;", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
+		queryFlowSql := fmt.Sprintf("select opt,integral,rollback from DBIntegralFlow_%v.tbIntegralFlow_%v "+
+			"where appid = ? and type = ? and id = ? and oid = ? for update;", req.GetAppid(),
+			utils.GetDBIndex(req.GetUid()))
 		row := tx.QueryRowContext(ctx, queryFlowSql, req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid())
 		if row.Err() != nil {
 			return row.Err()
 		}
 		// 读入
-		err := row.Scan(&flow.Opt, &flow.Integral, &flow.Timestamp, &flow.Rollback)
+		err := row.Scan(&flow.Opt, &flow.Integral, &flow.Rollback)
 		if err != nil {
 			return err
 		}

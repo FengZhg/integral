@@ -31,12 +31,11 @@ func (r *RedisHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model
 	}
 
 	// 发送生产pulsar消息
-	err = pulsarClient.Send(model.PulsarOpt, flowByte)
+	err = pulsarClient.Send(pulsarClient.PulsarOpt, flowByte)
 	if err != nil {
 		log.Errorf("Pulsar Send Msg Error %v", err)
 		return err
 	}
-
 	rsp.Integral = balance
 	return nil
 }
@@ -63,8 +62,8 @@ const (
 func modifyBalance(ctx *gin.Context, req *model.ModifyReq, flow string) (int64, error) {
 	// 构造key和参数
 	keys := []string{
-		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getBalanceKey(req.GetAppid(), req.GetType(), req.GetUid()),
+		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getFlowKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 	}
 	integral := req.GetIntegral()

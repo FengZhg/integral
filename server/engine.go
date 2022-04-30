@@ -28,10 +28,10 @@ func NewServer() *gin.Engine {
 	// 校验登录态的接口
 	api := engine.Group("api").Use(logic.Jwt.AuthMiddleware())
 	{
-		api.POST("/Query", queryBase)
-		api.POST("/Modify", modifyBase)
-		api.POST("/Rollback", rollbackBase)
-		api.POST("/QueryFlow", queryFlowBase)
+		api.POST("/query", queryBase)
+		api.POST("/modify", modifyBase)
+		api.POST("/rollback", rollbackBase)
+		api.POST("/queryflow", queryFlowBase)
 	}
 
 	engine.POST("/token", generateTokenBase)

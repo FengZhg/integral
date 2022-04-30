@@ -14,7 +14,6 @@ import (
 
 //QueryFlow Redis处理器查询积分流水
 func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *model.QueryFlowReq, rsp *model.QueryFlowRsp) error {
-
 	// 查询流水
 	flows, err := queryFlow(ctx, req)
 	if err != nil {
@@ -28,18 +27,15 @@ func (r *RedisHandler) QueryFlow(ctx *gin.Context, req *model.QueryFlowReq, rsp 
 //queryFlow 查询积分流水
 func queryFlow(ctx *gin.Context, req *model.QueryFlowReq) (flows []*model.SingleFlow, err error) {
 	// 构造
-	query := fmt.Sprintf("select id,oid,appid,type,opt,integral,timestamp,time,"+
+	query, param := fmt.Sprintf("select id,oid,appid,type,opt,integral,timestamp,time,"+
 		"rollback from DBIntegralFlow_%v.tbIntegralFlow_%v where id=? order by timestamp desc limit ?,?",
-		req.GetAppid(), utils.GetDBIndex(req.GetUid()))
-	param := []interface{}{req.GetUid(), req.GetOffset(), req.GetNum()}
-
+		req.GetAppid(), utils.GetDBIndex(req.GetUid())), []interface{}{req.GetUid(), req.GetOffset(), req.GetNum()}
 	// 请求
 	rows, err := dao.GetDBClient().QueryContext(ctx, query, param...)
 	if err != nil {
 		log.Errorf("Query Flow Error %v", err)
 		return nil, err
 	}
-
 	// 解析返回
 	for rows.Next() {
 		f := &model.SingleFlow{}

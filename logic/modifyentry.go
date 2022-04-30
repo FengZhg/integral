@@ -12,7 +12,6 @@ import (
 
 //Modify 逻辑函数
 func Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.ModifyRsp) error {
-
 	// 参数校验
 	err := checkModify(ctx, req)
 	if err != nil {

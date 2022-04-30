@@ -10,7 +10,6 @@ import (
 
 //Query 积分查询
 func Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
-
 	// 参数校验
 	if err := checkQuery(req); err != nil {
 		return err

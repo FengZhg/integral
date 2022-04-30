@@ -30,7 +30,7 @@ func (r *RedisHandler) Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *m
 	}
 
 	// 回滚丢进pulsar
-	err = pulsarClient.Send(model.PulsarOpt, flowBytes)
+	err = pulsarClient.Send(pulsarClient.PulsarOpt, flowBytes)
 	if err != nil {
 		log.Errorf("Pulsar Send Error %v", err)
 		return err
