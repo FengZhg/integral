@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
 )
@@ -28,8 +27,8 @@ func QueryFlow(ctx *gin.Context, req *model.QueryFlowReq, rsp *model.QueryFlowRs
 //checkQueryFlow 参数校验
 func checkQueryFlow(ctx *gin.Context, req *model.QueryFlowReq) error {
 
-	loginInfo := goJwt.GetLoginInfo(ctx)
-	if loginInfo.GetUid() != req.GetUid() || req.GetType() == "" || req.GetAppid() == "" || req.GetNum() < 0 {
+	//loginInfo := goJwt.GetLoginInfo(ctx) loginInfo.GetUid() != req.GetUid() ||
+	if req.GetType() == "" || req.GetAppid() == "" || req.GetNum() < 0 {
 		return model.ParamError
 	}
 

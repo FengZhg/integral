@@ -1,8 +1,6 @@
 package logic
 
 import (
-	"fmt"
-	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
 )
@@ -30,10 +28,10 @@ func Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.ModifyRsp) error 
 //checkModify 参数校验
 func checkModify(ctx *gin.Context, req *model.ModifyReq) error {
 	// 校验
-	if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() {
-		fmt.Println(goJwt.GetLoginInfo(ctx).String(), req.String())
-		return model.ParamError
-	}
+	//if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() {
+	//	fmt.Println(goJwt.GetLoginInfo(ctx).String(), req.String())
+	//	return model.ParamError
+	//}
 	// 判空
 	if req.GetType() == "" || req.GetAppid() == "" || req.GetIntegral() == 0 || req.GetOid() == "" ||
 		req.GetOpt() == 0 || req.GetUid() == "" {

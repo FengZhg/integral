@@ -43,9 +43,9 @@ func getRollbackTransaction(ctx *gin.Context, req *model.RollbackReq) func(*gin.
 			return err
 		}
 		// 判断是否已经回滚
-		if flow.GetRollback() == true {
-			return model.AlreadyRollbackError
-		}
+		//if flow.GetRollback() == true {
+		//	return model.AlreadyRollbackError
+		//}
 		// 修改流水标志
 		updateFlowSql := fmt.Sprintf("update DBIntegralFlow_%v.tbIntegralFlow_%v set rollback = true "+
 			"where appid = ? and type = ? and id = ? and oid = ? and rollback = false;", req.GetAppid(), utils.GetDBIndex(req.GetUid()))
@@ -57,9 +57,9 @@ func getRollbackTransaction(ctx *gin.Context, req *model.RollbackReq) func(*gin.
 		if err != nil {
 			return err
 		}
-		if aff == 0 {
-			return model.UpdateUnexpectedError
-		}
+		//if aff == 0 {
+		//	return model.UpdateUnexpectedError
+		//}
 		// 处理回滚需要的数据
 		integral := int64(flow.GetIntegral())
 		if flow.GetOpt() == 1 {

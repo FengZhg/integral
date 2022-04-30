@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"integral/dao"
 	"integral/model"
+	"sync"
 )
 
 // @Author: Feng
@@ -12,9 +13,11 @@ import (
 
 //Query Redis处理器的积分查询函数
 func (r *RedisHandler) Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
-	queryRsps := make([]*model.SingleQueryRsp, len(req.GetUids()))
+	queryRsps, wg := make([]*model.SingleQueryRsp, len(req.GetUids())), sync.WaitGroup{}
 	for index, uid := range req.GetUids() {
+		wg.Add(1)
 		go func(idx int, id string) {
+			defer wg.Done()
 			balance, err := singleQuery(ctx, req.GetAppid(), req.GetType(), uid)
 			if err != nil {
 				log.Errorf("Query Single User Balance Error %v", err)
@@ -28,6 +31,7 @@ func (r *RedisHandler) Query(ctx *gin.Context, req *model.QueryReq, rsp *model.Q
 			}
 		}(index, uid)
 	}
+	wg.Wait()
 	rsp.UsersRsp = queryRsps
 	return nil
 }

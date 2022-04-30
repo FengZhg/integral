@@ -36,9 +36,9 @@ func (d *dbHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model.Mo
 			utils.GetDBIndex(req.GetUid()))
 		_, err = tx.Exec(insertFlowSql, req.GetUid(), req.GetOid(), req.GetAppid(), req.GetType(), req.GetOpt(), req.GetIntegral(),
 			now.UnixNano(), now.Format("2006-01-02 15:04:05"))
-		if err != nil {
-			return err
-		}
+		//if err != nil {
+		//	return err
+		//}
 		// 查询返回余额
 		querySql := fmt.Sprintf("select integral from DBIntegral_%v.tbIntegral_%v where appid = ? and type = ? "+
 			"and id = ?", req.GetAppid(), utils.GetDBIndex(req.GetUid()))

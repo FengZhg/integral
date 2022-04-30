@@ -1,7 +1,6 @@
 package logic
 
 import (
-	"github.com/FengZhg/go_tools/goJwt"
 	"github.com/gin-gonic/gin"
 	"integral/model"
 )
@@ -26,7 +25,8 @@ func Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *model.RollbackRsp) 
 
 //checkRollback 参数校验
 func checkRollback(ctx *gin.Context, req *model.RollbackReq) error {
-	if goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() || req.GetOid() == "" || req.GetType() == "" || req.GetAppid() == "" {
+	//goJwt.GetLoginInfo(ctx).GetUid() != req.GetUid() ||
+	if req.GetOid() == "" || req.GetType() == "" || req.GetAppid() == "" {
 		return model.ParamError
 	}
 	return nil

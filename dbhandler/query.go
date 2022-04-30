@@ -7,6 +7,7 @@ import (
 	"integral/dao"
 	"integral/model"
 	"integral/utils"
+	"sync"
 )
 
 // @Author: Feng
@@ -14,14 +15,22 @@ import (
 
 //Query 余额修改
 func (d *dbHandler) Query(ctx *gin.Context, req *model.QueryReq, rsp *model.QueryRsp) error {
-	for _, uid := range req.GetUids() {
-		subRsp, err := doQuery(ctx, uid, req.GetType(), req.GetAppid())
-		if err != nil {
-			log.Errorf("Do Query User Error %v", err)
-			continue
-		}
-		rsp.UsersRsp = append(rsp.UsersRsp, subRsp)
+	wg := sync.WaitGroup{}
+	queryRsps := make([]*model.SingleQueryRsp, len(req.GetUids()))
+	for index, uid := range req.GetUids() {
+		wg.Add(1)
+		go func(idx int, id string) {
+			defer wg.Done()
+			subRsp, err := doQuery(ctx, uid, req.GetType(), req.GetAppid())
+			if err != nil {
+				log.Errorf("Query Single User Balance Error %v", err)
+				return
+			}
+			queryRsps[idx] = subRsp
+		}(index, uid)
 	}
+	wg.Wait()
+	rsp.UsersRsp = queryRsps
 	return nil
 }
 

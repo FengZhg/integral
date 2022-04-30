@@ -40,18 +40,18 @@ func (r *RedisHandler) Modify(ctx *gin.Context, req *model.ModifyReq, rsp *model
 // 定义余额修改lua脚本
 const (
 	modifyScript = `
-	if tonumber(redis.call('EXISTS', KEYS[1])) == 1 then 
-		return {0, 10004}
-	end
+	-- if tonumber(redis.call('EXISTS', KEYS[2])) == 1 then 
+	-- 	return {0, 10004}
+	-- end
 	local flow = ARGV[2]
 	local absBalance = tonumber(ARGV[1]) or 0
-	local balance = tonumber(redis.call('GET', KEYS[2])) or 0
+	local balance = tonumber(redis.call('GET', KEYS[1])) or 0
 	if balance + absBalance < 0 then 
 		return {0,10002}
 	end
-	redis.call('SETEX', KEYS[1], 2419200, absBalance)
+	redis.call('SETEX', KEYS[2], 2419200, absBalance)
 	redis.call('SETEX', KEYS[3], 2419200, flow)
-	return {tonumber(redis.call('INCRBY',KEYS[2], absBalance)), 0}
+	return {tonumber(redis.call('INCRBY',KEYS[1], absBalance)), 0}
 `
 )
 
@@ -59,8 +59,8 @@ const (
 func modifyBalance(ctx *gin.Context, req *model.ModifyReq, flow string) (int64, error) {
 	// 构造key和参数
 	keys := []string{
-		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getBalanceKey(req.GetAppid(), req.GetType(), req.GetUid()),
+		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getFlowKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 	}
 	integral := req.GetIntegral()

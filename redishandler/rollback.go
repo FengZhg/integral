@@ -23,7 +23,7 @@ func (r *RedisHandler) Rollback(ctx *gin.Context, req *model.RollbackReq, rsp *m
 		log.Errorf("Do Rollback Error %v", err)
 		return err
 	}
-	
+
 	// 构造并发送流水
 	go doRollbackFlow(flowStr)
 	return nil
@@ -35,12 +35,12 @@ const (
 		if flow == nil then
 			return {'', 10003}
 		end
-		local absBalance = tonumber(redis.call('GET', KEYS[1]))
+		local absBalance = tonumber(redis.call('GET', KEYS[2]))
 		if absBalance == nil then
 			return {'', 10006}
 		end
-		redis.call('INCRBY',KEYS[2], -1 * absBalance)
-		redis.call('DEL', KEYS[3])
+		redis.call('INCRBY',KEYS[1], -1 * absBalance)
+		-- redis.call('DEL', KEYS[3])
 		return {flow ,0}
 	`
 )
@@ -49,8 +49,8 @@ const (
 func doRollback(ctx *gin.Context, req *model.RollbackReq) (string, error) {
 	// 构造请求参数
 	keys := []string{
-		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getBalanceKey(req.GetAppid(), req.GetType(), req.GetUid()),
+		getOrderKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 		getFlowKey(req.GetAppid(), req.GetType(), req.GetUid(), req.GetOid()),
 	}
 
